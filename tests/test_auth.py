@@ -68,3 +68,22 @@ def test_refesh_token(client, token):
     assert 'access_token' in data
     assert 'token_type' in data
     assert data['token_type'] == 'bearer'
+
+
+def test_token_expired_dont_refresh(client, token):
+    with freeze_time('2025-01-27 12:00:00'):
+        response = client.post(
+            '/auth/refresh_token', headers={'Authorization': f'Bearer {token}'}
+        )
+
+        assert response.status_code == HTTPStatus.OK
+        token = response.json()['access_token']
+
+    with freeze_time('2025-01-27 12:31:00'):
+        response = client.post(
+            '/auth/refresh_token',
+            headers={'Authorization': f'Bearer {token}'},
+        )
+
+        assert response.status_code == HTTPStatus.UNAUTHORIZED
+        assert response.json() == {'detail': 'Could not validate credentials'}
