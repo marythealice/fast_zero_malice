@@ -1,8 +1,3 @@
-# Ignore version control and dependency files
-.git/
-node_modules/
-*.log
-*.tmp
 
 # Ignore environment files with secrets
 .env
